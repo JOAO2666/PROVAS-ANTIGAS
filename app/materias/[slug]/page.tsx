@@ -19,7 +19,7 @@ function criarSlug(texto: string) {
 let slugParaNomeOriginal: { [key: string]: string } = {};
 
 export async function generateStaticParams() {
-    const materiasDir = path.join(process.cwd(), 'Banco de Provas')
+    const materiasDir = path.join(process.cwd(), 'public', 'Banco de Provas')
     const allDirs = fs.readdirSync(materiasDir, { withFileTypes: true })
 
     // Limpa o mapeamento a cada build
@@ -37,7 +37,7 @@ export async function generateStaticParams() {
 function getArquivosDaMateria(slug: string) {
     // Se o mapeamento estiver vazio (pode acontecer em dev), recria-o
     if (Object.keys(slugParaNomeOriginal).length === 0) {
-        const materiasDir = path.join(process.cwd(), 'Banco de Provas');
+        const materiasDir = path.join(process.cwd(), 'public', 'Banco de Provas');
         const allDirs = fs.readdirSync(materiasDir, { withFileTypes: true });
         allDirs
             .filter(dirent => dirent.isDirectory())
@@ -47,7 +47,7 @@ function getArquivosDaMateria(slug: string) {
     }
 
     const nomeOriginal = slugParaNomeOriginal[slug] || decodeURIComponent(slug);
-    const pasta = path.join(process.cwd(), 'Banco de Provas', nomeOriginal)
+    const pasta = path.join(process.cwd(), 'public', 'Banco de Provas', nomeOriginal)
     if (!fs.existsSync(pasta)) return []
     return fs.readdirSync(pasta)
         .filter(nome => !nome.startsWith('.'))
