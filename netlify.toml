@@ -1,0 +1,11 @@
+# Global build settings
+[build]
+  # Command to build the site
+  command = "npm run build"
+  # Directory to publish
+  publish = ".next"
+
+# The following plugin will handle Next.js routing, server-side rendering,
+# and more, automatically.
+[[plugins]]
+  package = "@netlify/plugin-nextjs" 

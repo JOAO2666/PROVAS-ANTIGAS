@@ -1,9 +1,5 @@
 # Banco de Provas
 
-[![Deploy to GitHub Pages](https://github.com/JOAO2666/PROVAS-ANTIGAS/actions/workflows/deploy.yml/badge.svg)](https://github.com/JOAO2666/PROVAS-ANTIGAS/actions/workflows/deploy.yml)
-
-**Acesse o site:** [**https://joao2666.github.io/PROVAS-ANTIGAS/**](https://joao2666.github.io/PROVAS-ANTIGAS/)
-
 Um site para compartilhar e acessar provas antigas da faculdade, permitindo que os alunos contribuam com novas provas.
 
 ## Funcionalidades
