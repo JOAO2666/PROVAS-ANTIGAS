@@ -17,7 +17,7 @@ function criarSlug(texto: string) {
 
 // Função para buscar as matérias dinamicamente
 function getMaterias() {
-    const materiasDir = path.join(process.cwd(), 'public', 'Banco de Provas')
+    const materiasDir = path.join(process.cwd(), 'public', 'provas_unificadas')
     const allDirs = fs.readdirSync(materiasDir, { withFileTypes: true })
     return allDirs
         .filter(dirent => dirent.isDirectory() && dirent.name !== 'Indefinido' && dirent.name !== 'provas')

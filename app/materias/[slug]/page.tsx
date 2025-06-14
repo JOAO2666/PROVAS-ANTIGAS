@@ -19,7 +19,7 @@ function criarSlug(texto: string) {
 let slugParaNomeOriginal: { [key: string]: string } = {};
 
 export async function generateStaticParams() {
-    const materiasDir = path.join(process.cwd(), 'public', 'Banco de Provas')
+    const materiasDir = path.join(process.cwd(), 'public', 'provas_unificadas')
     const allDirs = fs.readdirSync(materiasDir, { withFileTypes: true })
 
     // Limpa o mapeamento a cada build
@@ -37,7 +37,7 @@ export async function generateStaticParams() {
 function getArquivosDaMateria(slug: string) {
     // Se o mapeamento estiver vazio (pode acontecer em dev), recria-o
     if (Object.keys(slugParaNomeOriginal).length === 0) {
-        const materiasDir = path.join(process.cwd(), 'public', 'Banco de Provas');
+        const materiasDir = path.join(process.cwd(), 'public', 'provas_unificadas');
         const allDirs = fs.readdirSync(materiasDir, { withFileTypes: true });
         allDirs
             .filter(dirent => dirent.isDirectory())
@@ -47,7 +47,7 @@ function getArquivosDaMateria(slug: string) {
     }
 
     const nomeOriginal = slugParaNomeOriginal[slug] || decodeURIComponent(slug);
-    const pasta = path.join(process.cwd(), 'public', 'Banco de Provas', nomeOriginal)
+    const pasta = path.join(process.cwd(), 'public', 'provas_unificadas', nomeOriginal)
     if (!fs.existsSync(pasta)) return []
     return fs.readdirSync(pasta)
         .filter(nome => !nome.startsWith('.'))
@@ -86,7 +86,7 @@ export default function MateriaDetalhe({ params }: { params: { slug: string } })
                                     <div className="truncate font-medium">{arq.nome}</div>
                                 </div>
                                 <a
-                                    href={`/Banco de Provas/${encodeURIComponent(nomeMateria)}/${encodeURIComponent(arq.nome)}`}
+                                    href={`/provas_unificadas/${encodeURIComponent(nomeMateria)}/${encodeURIComponent(arq.nome)}`}
                                     download
                                     className="bg-white text-[#0984e3] px-3 py-1 rounded font-semibold text-sm hover:bg-blue-100 transition"
                                 >
