@@ -3,6 +3,18 @@ import { FaFolderOpen } from 'react-icons/fa'
 import fs from 'fs'
 import path from 'path'
 
+// Função para criar um slug seguro para URL
+function criarSlug(texto: string) {
+    return texto
+        .normalize("NFD") // Normaliza para decompor acentos
+        .replace(/[\u0300-\u036f]/g, "") // Remove os acentos
+        .toLowerCase() // Converte para minúsculas
+        .replace(/[^a-z0-9\s-]/g, "") // Remove caracteres não alfanuméricos (exceto espaços e hifens)
+        .trim() // Remove espaços do início e fim
+        .replace(/\s+/g, "-") // Substitui espaços por hifens
+        .replace(/-+/g, "-"); // Remove múltiplos hifens
+}
+
 // Função para buscar as matérias dinamicamente
 function getMaterias() {
     const materiasDir = path.join(process.cwd(), 'Banco de Provas')
@@ -15,7 +27,7 @@ function getMaterias() {
             return {
                 nome: nome.trim(),
                 professor: prof.length > 0 ? prof.join(' - ').trim() : null,
-                slug: encodeURIComponent(dirent.name),
+                slug: criarSlug(dirent.name),
             }
         })
 }

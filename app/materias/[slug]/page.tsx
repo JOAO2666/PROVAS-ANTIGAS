@@ -3,16 +3,51 @@ import path from 'path'
 import { FaFilePdf, FaFileImage, FaFileAlt, FaArrowLeft } from 'react-icons/fa'
 import Link from 'next/link'
 
+// Função para criar um slug seguro para URL
+function criarSlug(texto: string) {
+    return texto
+        .normalize("NFD") // Normaliza para decompor acentos
+        .replace(/[\u0300-\u036f]/g, "") // Remove os acentos
+        .toLowerCase() // Converte para minúsculas
+        .replace(/[^a-z0-9\s-]/g, "") // Remove caracteres não alfanuméricos (exceto espaços e hifens)
+        .trim() // Remove espaços do início e fim
+        .replace(/\s+/g, "-") // Substitui espaços por hifens
+        .replace(/-+/g, "-"); // Remove múltiplos hifens
+}
+
+// Mapeamento de slugs para nomes originais das pastas
+let slugParaNomeOriginal: { [key: string]: string } = {};
+
 export async function generateStaticParams() {
     const materiasDir = path.join(process.cwd(), 'Banco de Provas')
     const allDirs = fs.readdirSync(materiasDir, { withFileTypes: true })
+
+    // Limpa o mapeamento a cada build
+    slugParaNomeOriginal = {};
+
     return allDirs
         .filter(dirent => dirent.isDirectory() && dirent.name !== 'Indefinido' && dirent.name !== 'provas')
-        .map(dirent => ({ slug: encodeURIComponent(dirent.name) }))
+        .map(dirent => {
+            const slug = criarSlug(dirent.name);
+            slugParaNomeOriginal[slug] = dirent.name; // Armazena a correspondência
+            return { slug };
+        });
 }
 
 function getArquivosDaMateria(slug: string) {
-    const pasta = path.join(process.cwd(), 'Banco de Provas', decodeURIComponent(slug))
+    // Se o mapeamento estiver vazio (pode acontecer em dev), recria-o
+    if (Object.keys(slugParaNomeOriginal).length === 0) {
+        const materiasDir = path.join(process.cwd(), 'Banco de Provas');
+        const allDirs = fs.readdirSync(materiasDir, { withFileTypes: true });
+        allDirs
+            .filter(dirent => dirent.isDirectory())
+            .forEach(dirent => {
+                slugParaNomeOriginal[criarSlug(dirent.name)] = dirent.name;
+            });
+    }
+
+    const nomeOriginal = slugParaNomeOriginal[slug] || decodeURIComponent(slug);
+    const pasta = path.join(process.cwd(), 'Banco de Provas', nomeOriginal)
     if (!fs.existsSync(pasta)) return []
     return fs.readdirSync(pasta)
         .filter(nome => !nome.startsWith('.'))
@@ -27,7 +62,7 @@ function getArquivosDaMateria(slug: string) {
 
 export default function MateriaDetalhe({ params }: { params: { slug: string } }) {
     const arquivos = getArquivosDaMateria(params.slug)
-    const nomeMateria = decodeURIComponent(params.slug)
+    const nomeMateria = slugParaNomeOriginal[params.slug] || decodeURIComponent(params.slug);
 
     return (
         <main className="min-h-screen bg-[#323232] flex flex-col items-center py-10 px-2">
