@@ -5,6 +5,9 @@
   # Directory to publish
   publish = ".next"
 
+[build.environment]
+  NODE_VERSION = "18"
+
 # The following plugin will handle Next.js routing, server-side rendering,
 # and more, automatically.
 [[plugins]]
