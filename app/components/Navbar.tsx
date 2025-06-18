@@ -37,7 +37,7 @@ export default function Navbar() {
                         <Link href="/sobre" className="text-gray-700 dark:text-[#3bb0ff] hover:text-blue-600 dark:hover:text-white transition-colors">
                             Sobre
                         </Link>
-                        <a href="https://github.com/JOAO2666" target="_blank" rel="noopener noreferrer" className="text-gray-700 dark:text-[#3bb0ff] hover:text-blue-600 dark:hover:text-white transition-colors">
+                        <a href="https://github.com/JOAO2666/PROVAS-ANTIGAS" target="_blank" rel="noopener noreferrer" className="text-gray-700 dark:text-[#3bb0ff] hover:text-blue-600 dark:hover:text-white transition-colors">
                             GitHub
                         </a>
                         <a href="https://www.univasf.edu.br/" target="_blank" rel="noopener noreferrer" className="text-gray-700 dark:text-[#3bb0ff] hover:text-blue-600 dark:hover:text-white transition-colors">
@@ -85,7 +85,7 @@ export default function Navbar() {
                             <Link href="/sobre" className="text-gray-700 dark:text-[#3bb0ff] hover:bg-gray-100 dark:hover:bg-gray-800 px-4 py-2 rounded" onClick={() => setIsMenuOpen(false)}>
                                 Sobre
                             </Link>
-                            <a href="https://github.com/JOAO2666" target="_blank" rel="noopener noreferrer" className="text-gray-700 dark:text-[#3bb0ff] hover:bg-gray-100 dark:hover:bg-gray-800 px-4 py-2 rounded">
+                            <a href="https://github.com/JOAO2666/PROVAS-ANTIGAS" target="_blank" rel="noopener noreferrer" className="text-gray-700 dark:text-[#3bb0ff] hover:bg-gray-100 dark:hover:bg-gray-800 px-4 py-2 rounded">
                                 GitHub
                             </a>
                             <a href="https://www.univasf.edu.br/" target="_blank" rel="noopener noreferrer" className="text-gray-700 dark:text-[#3bb0ff] hover:bg-gray-100 dark:hover:bg-gray-800 px-4 py-2 rounded">
