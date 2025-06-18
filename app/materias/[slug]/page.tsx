@@ -125,7 +125,7 @@ export default function MateriaDetalhe({ params }: { params: { slug: string } })
                                     <div className="truncate font-medium">{path.basename(arq.nome)}</div>
                                 </div>
                                 <a
-                                    href={`/PROVAS-ANTIGAS/provas_unificadas/${encodeURIComponent(nomeMateria)}/${encodeURIComponent(arq.nome).replace(/%5C/g, '/')}`}
+                                    href={`/provas_unificadas/${encodeURIComponent(nomeMateria)}/${arq.nome.replace(/\\/g, '/').split('/').map(part => encodeURIComponent(part)).join('/')}`}
                                     download
                                     className="bg-white text-[#0984e3] px-3 py-1 rounded font-semibold text-sm hover:bg-blue-100 transition"
                                 >
