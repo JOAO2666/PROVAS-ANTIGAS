@@ -1,6 +1,6 @@
 # Banco de Provas
 
-**Acesse o site:** [**https://joao2666.github.io/PROVAS-ANTIGAS/**](https://joao2666.github.io/PROVAS-ANTIGAS/)
+**Acesse o site:** [**https://univasf-materials.netlify.app/**](https://univasf-materials.netlify.app/)
 
 Um site para compartilhar e acessar provas antigas da faculdade, permitindo que os alunos contribuam com novas provas.
 
