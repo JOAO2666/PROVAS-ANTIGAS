@@ -89,8 +89,11 @@ export default function Contribuir() {
                                     required
                                 >
                                     <option value="">Selecione</option>
-                                    <option value="1">1º Semestre</option>
-                                    <option value="2">2º Semestre</option>
+                                    {Array.from({ length: 10 }, (_, i) => (
+                                        <option key={i + 1} value={i + 1}>
+                                            {i + 1}º Semestre
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 

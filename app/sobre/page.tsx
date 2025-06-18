@@ -19,7 +19,7 @@ export default function SobrePage() {
                             <a href="https://github.com/JOAO2666" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
                                 João
                             </a>
-                            , um estudante calouro do curso de Ciência da Computação na UNIVASF.
+                            , um estudante calouro do curso de Engenharia da Computação na UNIVASF.
                         </p>
                         <p>
                             A principal motivação para a criação deste site foi a necessidade de centralizar e facilitar o acesso a materiais de estudo, como provas e trabalhos antigos, para todos os estudantes da universidade. A ideia é criar uma plataforma colaborativa onde todos possam contribuir e se beneficiar.

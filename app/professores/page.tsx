@@ -39,12 +39,15 @@ function getProfessores(): Professor[] {
         .filter(dirent => dirent.isDirectory() && dirent.name !== 'Indefinido')
         .forEach(dirent => {
             const parts = dirent.name.split(' - ');
-            let nomeMateria = dirent.name;
-            let nomeProfessor = 'Não especificado';
+            let nomeMateria: string;
+            let nomeProfessor: string;
 
             if (parts.length > 1) {
-                nomeMateria = parts.slice(0, -1).join(' - ');
-                nomeProfessor = parts[parts.length - 1];
+                nomeProfessor = parts.pop()!;
+                nomeMateria = parts.join(' - ');
+            } else {
+                nomeMateria = dirent.name;
+                nomeProfessor = 'Não especificado';
             }
 
             if (!professoresMap[nomeProfessor]) {
@@ -53,7 +56,7 @@ function getProfessores(): Professor[] {
 
             professoresMap[nomeProfessor].push({
                 nome: nomeMateria,
-                slug: criarSlug(dirent.name)
+                slug: criarSlug(nomeMateria)
             });
         });
 
