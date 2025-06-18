@@ -62,14 +62,14 @@ function getArquivosDaMateria(slug: string) {
 
     if (!nomeOriginal) {
         console.log(`Nenhum nome original encontrado para o slug: ${slug}`);
-        return [];
+        return { arquivos: [], nomeOriginal: decodeURIComponent(slug) };
     }
 
     const pasta = path.join(process.cwd(), 'public', 'provas_unificadas', nomeOriginal);
 
     if (!fs.existsSync(pasta)) {
         console.log(`Pasta não encontrada: ${pasta}`);
-        return [];
+        return { arquivos: [], nomeOriginal };
     }
 
     // Função recursiva para ler arquivos em subdiretórios
@@ -96,12 +96,11 @@ function getArquivosDaMateria(slug: string) {
         return arquivos;
     };
 
-    return lerDiretoriosRecursivamente(pasta);
+    return { arquivos: lerDiretoriosRecursivamente(pasta), nomeOriginal };
 }
 
 export default function MateriaDetalhe({ params }: { params: { slug: string } }) {
-    const arquivos = getArquivosDaMateria(params.slug)
-    const nomeMateria = slugParaNomeOriginal[params.slug] || decodeURIComponent(params.slug);
+    const { arquivos, nomeOriginal: nomeMateria } = getArquivosDaMateria(params.slug)
 
     return (
         <main className="min-h-screen bg-[#323232] flex flex-col items-center py-10 px-2">
