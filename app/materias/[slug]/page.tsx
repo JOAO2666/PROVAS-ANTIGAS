@@ -5,59 +5,98 @@ import Link from 'next/link'
 
 // Função para criar um slug seguro para URL
 function criarSlug(texto: string) {
-    return texto
-        .normalize("NFD") // Normaliza para decompor acentos
-        .replace(/[\u0300-\u036f]/g, "") // Remove os acentos
-        .toLowerCase() // Converte para minúsculas
-        .replace(/[^a-z0-9\s-]/g, "") // Remove caracteres não alfanuméricos (exceto espaços e hifens)
-        .trim() // Remove espaços do início e fim
-        .replace(/\s+/g, "-") // Substitui espaços por hifens
-        .replace(/-+/g, "-"); // Remove múltiplos hifens
+    const comAcento = "áàãâéêíóôõúçÁÀÃÂÉÊÍÓÔÕÚÇ";
+    const semAcento = "aaaaeeioooucaaaaeeiooouc";
+
+    let novoTexto = texto
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
+
+    for (let i = 0; i < comAcento.length; i++) {
+        novoTexto = novoTexto.replace(new RegExp(comAcento[i], "g"), semAcento[i]);
+    }
+
+    return novoTexto.replace(/[^a-z0-9-]/g, "");
 }
 
 // Mapeamento de slugs para nomes originais das pastas
 let slugParaNomeOriginal: { [key: string]: string } = {};
 
-export async function generateStaticParams() {
-    const materiasDir = path.join(process.cwd(), 'public', 'provas_unificadas')
-    const allDirs = fs.readdirSync(materiasDir, { withFileTypes: true })
+function gerarMapeamentoDeSlugs() {
+    if (Object.keys(slugParaNomeOriginal).length > 0) return;
 
-    // Limpa o mapeamento a cada build
-    slugParaNomeOriginal = {};
-
-    return allDirs
-        .filter(dirent => dirent.isDirectory() && dirent.name !== 'Indefinido' && dirent.name !== 'provas')
-        .map(dirent => {
-            const slug = criarSlug(dirent.name);
-            slugParaNomeOriginal[slug] = dirent.name; // Armazena a correspondência
-            return { slug };
-        });
-}
-
-function getArquivosDaMateria(slug: string) {
-    // Se o mapeamento estiver vazio (pode acontecer em dev), recria-o
-    if (Object.keys(slugParaNomeOriginal).length === 0) {
-        const materiasDir = path.join(process.cwd(), 'public', 'provas_unificadas');
+    const materiasDir = path.join(process.cwd(), 'public', 'provas_unificadas');
+    try {
         const allDirs = fs.readdirSync(materiasDir, { withFileTypes: true });
+        slugParaNomeOriginal = {}; // Limpa para garantir que está fresco
         allDirs
             .filter(dirent => dirent.isDirectory())
             .forEach(dirent => {
-                slugParaNomeOriginal[criarSlug(dirent.name)] = dirent.name;
+                const parts = dirent.name.split(' - ');
+                const nomeMateria = parts.length > 1 ? parts.slice(0, -1).join(' - ') : dirent.name;
+                const slugMateria = criarSlug(nomeMateria);
+
+                // Prioriza mapeamentos mais específicos (matéria-professor)
+                if (!slugParaNomeOriginal[slugMateria]) {
+                    slugParaNomeOriginal[slugMateria] = dirent.name;
+                }
+                const slugCompleto = criarSlug(dirent.name);
+                slugParaNomeOriginal[slugCompleto] = dirent.name;
             });
+    } catch (error) {
+        console.error("Erro ao ler diretório de matérias:", error);
+    }
+}
+
+export async function generateStaticParams() {
+    gerarMapeamentoDeSlugs();
+    return Object.keys(slugParaNomeOriginal).map(slug => ({ slug }));
+}
+
+function getArquivosDaMateria(slug: string) {
+    gerarMapeamentoDeSlugs();
+
+    const nomeOriginal = slugParaNomeOriginal[slug] || Object.values(slugParaNomeOriginal).find(nome => criarSlug(nome) === slug) || decodeURIComponent(slug);
+
+    if (!nomeOriginal) {
+        console.log(`Nenhum nome original encontrado para o slug: ${slug}`);
+        return [];
     }
 
-    const nomeOriginal = slugParaNomeOriginal[slug] || decodeURIComponent(slug);
-    const pasta = path.join(process.cwd(), 'public', 'provas_unificadas', nomeOriginal)
-    if (!fs.existsSync(pasta)) return []
-    return fs.readdirSync(pasta)
-        .filter(nome => !nome.startsWith('.'))
-        .map(nome => {
-            const ext = nome.split('.').pop()?.toLowerCase()
-            let tipo: 'pdf' | 'img' | 'outro' = 'outro'
-            if (ext === 'pdf') tipo = 'pdf'
-            else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext || '')) tipo = 'img'
-            return { nome, tipo }
-        })
+    const pasta = path.join(process.cwd(), 'public', 'provas_unificadas', nomeOriginal);
+
+    if (!fs.existsSync(pasta)) {
+        console.log(`Pasta não encontrada: ${pasta}`);
+        return [];
+    }
+
+    // Função recursiva para ler arquivos em subdiretórios
+    const lerDiretoriosRecursivamente = (dir: string): { nome: string; tipo: 'pdf' | 'img' | 'outro' }[] => {
+        const entradas = fs.readdirSync(dir, { withFileTypes: true });
+        const arquivos = entradas.flatMap((entrada) => {
+            const res = path.resolve(dir, entrada.name);
+            if (entrada.isDirectory()) {
+                return lerDiretoriosRecursivamente(res);
+            }
+            if (entrada.name.startsWith('.')) {
+                return [];
+            }
+            const ext = entrada.name.split('.').pop()?.toLowerCase();
+            let tipo: 'pdf' | 'img' | 'outro' = 'outro';
+            if (ext === 'pdf') tipo = 'pdf';
+            else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext || '')) tipo = 'img';
+
+            // Retorna o caminho relativo da pasta da matéria para uso no link
+            const nomeRelativo = path.relative(pasta, res);
+
+            return { nome: nomeRelativo, tipo };
+        });
+        return arquivos;
+    };
+
+    return lerDiretoriosRecursivamente(pasta);
 }
 
 export default function MateriaDetalhe({ params }: { params: { slug: string } }) {
@@ -83,10 +122,10 @@ export default function MateriaDetalhe({ params }: { params: { slug: string } })
                                     {arq.tipo === 'outro' && <FaFileAlt className="w-8 h-8 text-white" />}
                                 </div>
                                 <div className="flex-1 overflow-hidden">
-                                    <div className="truncate font-medium">{arq.nome}</div>
+                                    <div className="truncate font-medium">{path.basename(arq.nome)}</div>
                                 </div>
                                 <a
-                                    href={`/PROVAS-ANTIGAS/provas_unificadas/${encodeURIComponent(nomeMateria)}/${encodeURIComponent(arq.nome)}`}
+                                    href={`/PROVAS-ANTIGAS/provas_unificadas/${encodeURIComponent(nomeMateria)}/${encodeURIComponent(arq.nome).replace(/%5C/g, '/')}`}
                                     download
                                     className="bg-white text-[#0984e3] px-3 py-1 rounded font-semibold text-sm hover:bg-blue-100 transition"
                                 >

@@ -5,31 +5,54 @@ import path from 'path'
 
 // Função para criar um slug seguro para URL
 function criarSlug(texto: string) {
-    return texto
-        .normalize("NFD") // Normaliza para decompor acentos
-        .replace(/[\u0300-\u036f]/g, "") // Remove os acentos
-        .toLowerCase() // Converte para minúsculas
-        .replace(/[^a-z0-9\s-]/g, "") // Remove caracteres não alfanuméricos (exceto espaços e hifens)
-        .trim() // Remove espaços do início e fim
-        .replace(/\s+/g, "-") // Substitui espaços por hifens
-        .replace(/-+/g, "-"); // Remove múltiplos hifens
+    const comAcento = "áàãâéêíóôõúçÁÀÃÂÉÊÍÓÔÕÚÇ";
+    const semAcento = "aaaaeeioooucaaaaeeiooouc";
+
+    let novoTexto = texto
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
+
+    for (let i = 0; i < comAcento.length; i++) {
+        novoTexto = novoTexto.replace(new RegExp(comAcento[i], "g"), semAcento[i]);
+    }
+
+    return novoTexto.replace(/[^a-z0-9-]/g, "");
 }
 
-// Função para buscar as matérias dinamicamente
+type Materia = {
+    nome: string;
+    slug: string;
+}
+
 function getMaterias() {
     const materiasDir = path.join(process.cwd(), 'public', 'provas_unificadas')
     const allDirs = fs.readdirSync(materiasDir, { withFileTypes: true })
-    return allDirs
         .filter(dirent => dirent.isDirectory() && dirent.name !== 'Indefinido' && dirent.name !== 'provas')
-        .map(dirent => {
-            // Separar nome da matéria e professor, se houver
-            const [nome, ...prof] = dirent.name.split(' - ')
-            return {
-                nome: nome.trim(),
-                professor: prof.length > 0 ? prof.join(' - ').trim() : null,
-                slug: criarSlug(dirent.name),
+        .map(dirent => ({
+            nome: dirent.name,
+            slug: criarSlug(dirent.name.split(' - ').slice(0, -1).join(' - ') || dirent.name)
+        }));
+
+    // Remove duplicatas de slugs, mantendo o nome mais completo
+    const materiasUnicas: { [key: string]: Materia } = {};
+    allDirs.forEach(materia => {
+        if (!materiasUnicas[materia.slug] || materiasUnicas[materia.slug].nome.length < materia.nome.length) {
+            // Ajusta o nome para não incluir o professor se já existir uma matéria com o mesmo slug base
+            const parts = materia.nome.split(' - ');
+            if (parts.length > 1) {
+                const nomeBase = parts.slice(0, -1).join(' - ');
+                if (allDirs.some(m => m.nome === nomeBase)) {
+                    materiasUnicas[materia.slug] = { ...materia, nome: nomeBase };
+                    return;
+                }
             }
-        })
+            materiasUnicas[materia.slug] = materia;
+        }
+    });
+
+    return Object.values(materiasUnicas).sort((a, b) => a.nome.localeCompare(b.nome));
 }
 
 export default function Materias() {
@@ -46,9 +69,6 @@ export default function Materias() {
                     >
                         <FaFolderOpen className="w-8 h-8 mb-2 text-white" />
                         <div className="text-lg font-medium text-center mb-1">{materia.nome}</div>
-                        {materia.professor && (
-                            <div className="text-xs text-blue-100 mb-1">{materia.professor}</div>
-                        )}
                     </Link>
                 ))}
             </div>

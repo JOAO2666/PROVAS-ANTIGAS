@@ -9,14 +9,20 @@ export const metadata: Metadata = {
 
 // Função para criar um slug seguro para URL
 function criarSlug(texto: string) {
-    return texto
-        .normalize("NFD")
-        .replace(/[\\u0300-\\u036f]/g, "")
+    const comAcento = "áàãâéêíóôõúçÁÀÃÂÉÊÍÓÔÕÚÇ";
+    const semAcento = "aaaaeeioooucaaaaeeiooouc";
+
+    let novoTexto = texto
         .toLowerCase()
-        .replace(/[^a-z0-9\\s-]/g, "")
         .trim()
-        .replace(/\\s+/g, "-")
+        .replace(/\s+/g, "-")
         .replace(/-+/g, "-");
+
+    for (let i = 0; i < comAcento.length; i++) {
+        novoTexto = novoTexto.replace(new RegExp(comAcento[i], "g"), semAcento[i]);
+    }
+
+    return novoTexto.replace(/[^a-z0-9-]/g, "");
 }
 
 type Materia = {
